@@ -39,7 +39,6 @@
         .page-transition {
             animation: fadeIn 0.15s ease-in-out;
         }
-        /* 优化底部滚动条样式，使其在手机上更加美观且丝滑 */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -55,40 +54,40 @@
     <div class="max-w-md mx-auto w-full p-4 pb-2 space-y-3">
         <div class="flex justify-between items-center px-1">
             <div class="flex items-center space-x-2">
-                <span class="text-xl">📊</span>
-                <h1 id="sheetTitleDisplay" class="text-base font-bold tracking-wider text-emerald-700 cursor-pointer truncate max-w-[240px]" onclick="renameCurrentSheet()" title="点击重命名 Sheet">Sales-Rolling-Apps</h1>
+                <span class="text-2xl">📊</span>
+                <h1 id="sheetTitleDisplay" class="text-lg font-bold tracking-wider text-emerald-700 cursor-pointer truncate max-w-[220px]" onclick="renameCurrentSheet()" title="点击重命名 Sheet">Sales-Rolling-Apps</h1>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="clearCurrentSheet()" class="bg-gray-200 text-gray-700 font-semibold px-2.5 py-1.5 rounded-xl text-xs active:scale-95 transition" title="清空当前 Sheet 数据">
+                <button onclick="clearCurrentSheet()" class="bg-gray-200 text-gray-700 font-bold px-3 py-2 rounded-xl text-xs active:scale-95 transition shadow-2xs" title="清空当前 Sheet 数据">
                     🧹 清空
                 </button>
             </div>
         </div>
 
         <!-- 统计面板 -->
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex justify-between items-center">
+        <div class="bg-white p-4.5 rounded-2xl shadow-sm border border-emerald-100 flex justify-between items-center">
             <div>
-                <span class="text-[10px] text-gray-400 uppercase tracking-wider block font-semibold">Checked Total (已勾选合计)</span>
-                <div id="checkedTotalDisplay" class="text-xl font-black text-emerald-600">0.00</div>
+                <span class="text-[11px] text-gray-400 uppercase tracking-wider block font-semibold">Checked Total (已勾选合计)</span>
+                <div id="checkedTotalDisplay" class="text-2xl font-black text-emerald-600">0.00</div>
             </div>
             <div class="text-right border-l border-gray-100 pl-4">
-                <span class="text-[10px] text-gray-400 uppercase tracking-wider block font-semibold">Grand Total (全页总计)</span>
-                <div id="grandTotalDisplay" class="text-xl font-black text-gray-800">0.00</div>
+                <span class="text-[11px] text-gray-400 uppercase tracking-wider block font-semibold">Grand Total (全页总计)</span>
+                <div id="grandTotalDisplay" class="text-2xl font-black text-gray-800">0.00</div>
             </div>
         </div>
     </div>
 
-    <!-- 中间 33 行固定表格区 -->
-    <div class="max-w-md mx-auto w-full p-4 pt-1 space-y-2 pb-36 page-transition flex-1 overflow-y-auto" id="rowsContainer">
+    <!-- 中间 33 行固定表格区 (加大行高与触控间距) -->
+    <div class="max-w-md mx-auto w-full p-4 pt-1 space-y-2.5 pb-40 page-transition flex-1 overflow-y-auto" id="rowsContainer">
         <!-- 动态生成 33 行 -->
     </div>
 
-    <!-- 底部 Excel 风格 Sheet 标签栏 (放大尺寸 + 丝滑无碍滚动) -->
-    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-gray-200 px-3 py-3 flex items-center space-x-2 z-50 shadow-2xl">
+    <!-- 底部 Excel 风格 Sheet 标签栏 (巨幅放大版，适合大拇指轻松点按) -->
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-gray-200 px-3.5 py-3.5 flex items-center space-x-2.5 z-50 shadow-2xl">
         <div id="sheetTabsContainer" class="flex items-center space-x-2 flex-1 overflow-x-auto no-scrollbar py-1">
             <!-- 动态生成 Sheet 标签 -->
         </div>
-        <button onclick="addNewSheet()" class="w-11 h-11 bg-emerald-600 text-white hover:bg-emerald-700 rounded-2xl flex items-center justify-center font-bold text-xl transition shrink-0 active:scale-95 shadow-md" title="新增 Sheet 页面">
+        <button onclick="addNewSheet()" class="w-12 h-12 bg-emerald-600 text-white hover:bg-emerald-700 rounded-2xl flex items-center justify-center font-bold text-2xl transition shrink-0 active:scale-95 shadow-md" title="新增 Sheet 页面">
             +
         </button>
     </div>
@@ -240,20 +239,20 @@
             // 1. 渲染顶部标题
             document.getElementById('sheetTitleDisplay').textContent = sheet.name;
 
-            // 2. 渲染底部 Sheet 标签栏 (加大尺寸、支持优雅横向滚动)
+            // 2. 渲染底部 Sheet 标签栏 (特大号触控区 + 名字横向滚动)
             let tabsContainer = document.getElementById('sheetTabsContainer');
             tabsContainer.innerHTML = appData.map((s, index) => {
                 let isActive = s.id === activeSheetId;
                 return `
-                    <div class="flex items-center space-x-1.5 shrink-0 ${isActive ? 'bg-emerald-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} px-3.5 py-2 rounded-2xl text-xs font-bold transition">
-                        <div onclick="switchSheet(${s.id})" class="cursor-pointer flex items-center space-x-1 max-w-[120px] truncate" title="${s.name}">
-                            <span>📊</span>
+                    <div class="flex items-center space-x-2 shrink-0 ${isActive ? 'bg-emerald-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} px-4 py-2.5 rounded-2xl text-xs font-bold transition">
+                        <div onclick="switchSheet(${s.id})" class="cursor-pointer flex items-center space-x-1.5 max-w-[130px] truncate" title="${s.name}">
+                            <span class="text-sm">📊</span>
                             <span class="truncate">${s.name}</span>
                         </div>
                         <div class="flex items-center space-x-1 ml-1 opacity-90">
-                            ${index > 0 ? `<button onclick="moveSheet(${index}, -1)" title="向左移动" class="px-1 py-0.5 hover:bg-black/10 rounded">◀</button>` : ''}
-                            ${index < appData.length - 1 ? `<button onclick="moveSheet(${index}, 1)" title="向右移动" class="px-1 py-0.5 hover:bg-black/10 rounded">▶</button>` : ''}
-                            ${appData.length > 1 ? `<button onclick="deleteCurrentSheet(${s.id}, event)" title="删除" class="px-1 py-0.5 hover:text-rose-200">×</button>` : ''}
+                            ${index > 0 ? `<button onclick="moveSheet(${index}, -1)" title="向左移动" class="px-1.5 py-1 hover:bg-black/10 rounded-lg text-xs">◀</button>` : ''}
+                            ${index < appData.length - 1 ? `<button onclick="moveSheet(${index}, 1)" title="向右移动" class="px-1.5 py-1 hover:bg-black/10 rounded-lg text-xs">▶</button>` : ''}
+                            ${appData.length > 1 ? `<button onclick="deleteCurrentSheet(${s.id}, event)" title="删除" class="px-1.5 py-1 hover:text-rose-200 text-sm">×</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -274,30 +273,30 @@
             document.getElementById('checkedTotalDisplay').textContent = checkedTotal.toFixed(2);
             document.getElementById('grandTotalDisplay').textContent = grandTotal.toFixed(2);
 
-            // 4. 渲染固定 33 行
+            // 4. 渲染固定 33 行 (加大加宽每个行卡片)
             let rowsContainer = document.getElementById('rowsContainer');
             rowsContainer.innerHTML = sheet.rows.map((r, idx) => {
                 let amountColorClass = r.pending ? 'text-rose-600 font-black' : 'text-emerald-700 font-bold';
 
                 return `
-                    <div class="bg-white p-2.5 rounded-xl shadow-2xs border ${r.checked ? 'border-emerald-500 bg-emerald-50/40' : 'border-gray-200'} flex items-center justify-between space-x-2 transition">
-                        <!-- 序号与主勾选框与标签 -->
-                        <div class="flex items-center space-x-2.5 flex-1">
-                            <span class="text-[10px] text-gray-400 font-mono w-5 text-right">${idx + 1}</span>
-                            <input type="checkbox" ${r.checked ? 'checked' : ''} onchange="toggleRowCheck(${r.id})" class="w-5 h-5 accent-emerald-600 cursor-pointer rounded" title="勾选计入统计">
-                            <input type="text" value="${r.label}" onchange="updateRowData(${r.id}, 'label', this.value)" class="bg-transparent text-xs font-medium text-gray-700 focus:outline-none w-full border-b border-transparent focus:border-emerald-500 pb-0.5">
+                    <div class="bg-white p-3.5 rounded-2xl shadow-2xs border ${r.checked ? 'border-emerald-500 bg-emerald-50/50' : 'border-gray-200'} flex items-center justify-between space-x-2.5 transition">
+                        <!-- 序号与主勾选框与标签 (大号复选框) -->
+                        <div class="flex items-center space-x-3 flex-1">
+                            <span class="text-xs text-gray-400 font-mono w-6 text-right">${idx + 1}</span>
+                            <input type="checkbox" ${r.checked ? 'checked' : ''} onchange="toggleRowCheck(${r.id})" class="w-6 h-6 accent-emerald-600 cursor-pointer rounded-md" title="勾选计入统计">
+                            <input type="text" value="${r.label}" onchange="updateRowData(${r.id}, 'label', this.value)" class="bg-transparent text-sm font-semibold text-gray-800 focus:outline-none w-full border-b border-transparent focus:border-emerald-500 pb-0.5">
                         </div>
 
-                        <!-- 金额输入框与 ⏳ 状态勾选 -->
-                        <div class="flex items-center space-x-2 shrink-0">
-                            <label class="flex items-center space-x-0.5 cursor-pointer bg-gray-50 hover:bg-gray-100 px-1.5 py-1 rounded-lg border border-gray-200 text-[10px]" title="标记待定/红字 (⏳)">
-                                <span class="select-none">⏳</span>
-                                <input type="checkbox" ${r.pending ? 'checked' : ''} onchange="toggleRowPending(${r.id})" class="w-3.5 h-3.5 accent-rose-600 cursor-pointer rounded">
+                        <!-- 金额输入框与 ⏳ 状态勾选 (增大整体点击区) -->
+                        <div class="flex items-center space-x-2.5 shrink-0">
+                            <label class="flex items-center space-x-1 cursor-pointer bg-gray-50 hover:bg-gray-100 px-2 py-1.5 rounded-xl border border-gray-200 text-xs" title="标记待定/红字 (⏳)">
+                                <span class="select-none text-sm">⏳</span>
+                                <input type="checkbox" ${r.pending ? 'checked' : ''} onchange="toggleRowPending(${r.id})" class="w-4 h-4 accent-rose-600 cursor-pointer rounded">
                             </label>
 
-                            <div class="flex items-center bg-gray-50 px-2 py-1 rounded-lg border border-gray-200">
-                                <span class="text-[9px] text-gray-400 mr-1">RM</span>
-                                <input type="number" step="0.01" value="${r.amount !== '' ? r.amount : ''}" placeholder="" onchange="updateRowData(${r.id}, 'amount', this.value)" class="bg-transparent text-xs ${amountColorClass} w-20 text-right focus:outline-none">
+                            <div class="flex items-center bg-gray-50 px-2.5 py-1.5 rounded-xl border border-gray-200">
+                                <span class="text-[10px] text-gray-400 mr-1.5 font-semibold">RM</span>
+                                <input type="number" step="0.01" value="${r.amount !== '' ? r.amount : ''}" placeholder="" onchange="updateRowData(${r.id}, 'amount', this.value)" class="bg-transparent text-sm ${amountColorClass} w-24 text-right focus:outline-none">
                             </div>
                         </div>
                     </div>
