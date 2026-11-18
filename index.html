@@ -1,113 +1,119 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sales-Rolling-Apps</title>
     
     <!-- 纯内联图标 -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E📈%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E📈%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E📊%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E📊%3C/text%3E%3C/svg%3E">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        brand: { light: '#0ea5e9', dark: '#38bdf8' }
+                        excel: {
+                            green: '#107c41',
+                            light: '#f3f4f6',
+                            border: '#e5e7eb',
+                            focus: '#185abd'
+                        }
                     }
                 }
             }
         }
     </script>
     <style>
+        body {
+            background-color: #f8fafc;
+            color: #1f2937;
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.99); }
             to { opacity: 1; transform: scale(1); }
         }
         .page-transition {
-            animation: fadeIn 0.2s ease-in-out;
+            animation: fadeIn 0.15s ease-in-out;
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-[#0f172a] text-gray-800 dark:text-gray-100 min-h-screen flex flex-col justify-between transition-colors duration-300">
+<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-100">
 
     <!-- 顶部 Header -->
     <div class="max-w-md mx-auto w-full p-4 pb-2 space-y-3">
         <div class="flex justify-between items-center px-1">
             <div class="flex items-center space-x-2">
-                <span class="text-xl">📈</span>
-                <h1 id="sheetTitleDisplay" class="text-base font-bold tracking-wider text-sky-400 cursor-pointer" onclick="renameCurrentSheet()" title="点击重命名 Sheet">Sales-Rolling-Apps</h1>
+                <span class="text-xl">📊</span>
+                <h1 id="sheetTitleDisplay" class="text-base font-bold tracking-wider text-emerald-700 cursor-pointer" onclick="renameCurrentSheet()" title="点击重命名 Sheet">Sales-Rolling-Apps</h1>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="addRow()" class="bg-sky-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow-md active:scale-95 transition">
-                    + Add Row
+                <button onclick="clearCurrentSheet()" class="bg-gray-200 text-gray-700 font-semibold px-2.5 py-1.5 rounded-xl text-xs active:scale-95 transition" title="清空当前 Sheet 数据">
+                    🧹 清空
                 </button>
             </div>
         </div>
 
-        <!-- 统计面板 (选中合计 vs 全页总计) -->
-        <div class="bg-white dark:bg-[#1e293b] p-3.5 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-800 flex justify-between items-center">
+        <!-- 统计面板 (Excel 绿白极简风) -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex justify-between items-center">
             <div>
-                <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Checked Total (已勾选合计)</span>
-                <div id="checkedTotalDisplay" class="text-lg font-black text-emerald-400">0.00</div>
+                <span class="text-[10px] text-gray-400 uppercase tracking-wider block font-semibold">Checked Total (已勾选合计)</span>
+                <div id="checkedTotalDisplay" class="text-xl font-black text-emerald-600">0.00</div>
             </div>
-            <div class="text-right border-l border-gray-200 dark:border-slate-700 pl-4">
-                <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Grand Total (全页总计)</span>
-                <div id="grandTotalDisplay" class="text-lg font-black text-sky-400">0.00</div>
+            <div class="text-right border-l border-gray-100 pl-4">
+                <span class="text-[10px] text-gray-400 uppercase tracking-wider block font-semibold">Grand Total (全页总计)</span>
+                <div id="grandTotalDisplay" class="text-xl font-black text-gray-800">0.00</div>
             </div>
         </div>
     </div>
 
-    <!-- 中间滚动行数据区 -->
+    <!-- 中间 33 行固定表格区 -->
     <div class="max-w-md mx-auto w-full p-4 pt-1 space-y-2 pb-36 page-transition flex-1 overflow-y-auto" id="rowsContainer">
-        <!-- 动态生成行 -->
+        <!-- 动态生成 33 行 -->
     </div>
 
-    <!-- 底部 Excel 风格 Sheet 标签栏 (类似图2) -->
-    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 px-3 py-2.5 flex items-center space-x-2 z-50 shadow-2xl overflow-x-auto">
-        <div id="sheetTabsContainer" class="flex items-center space-x-2 flex-1 overflow-x-auto pb-1">
+    <!-- 底部 Excel 风格 Sheet 标签栏 (支持左右移动、新增) -->
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-gray-200 px-3 py-2.5 flex items-center space-x-2 z-50 shadow-2xl">
+        <div id="sheetTabsContainer" class="flex items-center space-x-1.5 flex-1 overflow-x-auto pb-1">
             <!-- 动态生成 Sheet 标签 -->
         </div>
-        <button onclick="addNewSheet()" class="w-9 h-9 bg-sky-500/20 text-sky-400 hover:bg-sky-500 hover:text-white rounded-xl flex items-center justify-center font-bold text-lg transition shrink-0 active:scale-95 shadow-sm" title="新增 Sheet 页面">
+        <button onclick="addNewSheet()" class="w-9 h-9 bg-emerald-600 text-white hover:bg-emerald-700 rounded-xl flex items-center justify-center font-bold text-lg transition shrink-0 active:scale-95 shadow-sm" title="新增 Sheet 页面">
             +
         </button>
     </div>
 
     <!-- Core JavaScript -->
     <script>
-        // 数据结构：多 Sheet 存储
-        // 每个 sheet 包含 id, name, rows: [{ id, checked, label, amount }]
-        let appData = JSON.parse(localStorage.getItem('sales_rolling_sheets')) || [
+        // 初始化默认生成 33 行的辅助函数
+        function createDefault33Rows() {
+            let rows = [];
+            for (let i = 1; i <= 33; i++) {
+                rows.push({
+                    id: Date.now() + i,
+                    checked: false,
+                    label: `${i}`,
+                    amount: 0
+                });
+            }
+            return rows;
+        }
+
+        let appData = JSON.parse(localStorage.getItem('sales_excel_sheets')) || [
             {
                 id: 1,
                 name: "Sheet 1",
-                rows: [
-                    { id: 101, checked: true, label: "Day 1", amount: 492.90 },
-                    { id: 102, checked: true, label: "Day 2", amount: 121.90 },
-                    { id: 103, checked: false, label: "Day 3", amount: 190.00 },
-                    { id: 104, checked: true, label: "Day 4", amount: 687.00 },
-                    { id: 105, checked: true, label: "Day 5", amount: 308.00 }
-                ]
-            },
-            {
-                id: 2,
-                name: "Sheet 2",
-                rows: [
-                    { id: 201, checked: false, label: "Item A", amount: 150.00 },
-                    { id: 202, checked: false, label: "Item B", amount: 230.50 }
-                ]
+                rows: createDefault33Rows()
             }
         ];
 
-        let activeSheetId = parseInt(localStorage.getItem('sales_active_sheet')) || appData[0].id;
+        let activeSheetId = parseInt(localStorage.getItem('sales_excel_active_sheet')) || appData[0].id;
 
         function saveData() {
-            localStorage.setItem('sales_rolling_sheets', JSON.stringify(appData));
-            localStorage.setItem('sales_active_sheet', activeSheetId);
+            localStorage.setItem('sales_excel_sheets', JSON.stringify(appData));
+            localStorage.setItem('sales_excel_active_sheet', activeSheetId);
             render();
         }
 
@@ -131,9 +137,7 @@
             appData.push({
                 id: newId,
                 name: newName,
-                rows: [
-                    { id: Date.now() + 1, checked: false, label: "Row 1", amount: 0 }
-                ]
+                rows: createDefault33Rows()
             });
             activeSheetId = newId;
             saveData();
@@ -147,6 +151,16 @@
                 sheet.name = newName.trim();
                 saveData();
             }
+        }
+
+        // 移动 Sheet 位置 (向左 / 向右)
+        function moveSheet(index, direction) {
+            let targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= appData.length) return;
+            let temp = appData[index];
+            appData[index] = appData[targetIndex];
+            appData[targetIndex] = temp;
+            saveData();
         }
 
         function deleteCurrentSheet(id, event) {
@@ -164,21 +178,16 @@
             }
         }
 
-        function addRow() {
+        function clearCurrentSheet() {
             let sheet = getCurrentSheet();
             if (!sheet) return;
-            let label = prompt("输入行标签名称 (例如: Day 18 或 客户名称):", `Row ${sheet.rows.length + 1}`);
-            if (label === null) return;
-            let amountStr = prompt("输入数字金额:", "0");
-            if (amountStr === null) return;
-
-            sheet.rows.push({
-                id: Date.now(),
-                checked: false,
-                label: label.trim() || `Row ${sheet.rows.length + 1}`,
-                amount: parseFloat(amountStr) || 0
-            });
-            saveData();
+            if (confirm("确定要清空当前 Sheet 的所有勾选和数字吗？")) {
+                sheet.rows.forEach(r => {
+                    r.checked = false;
+                    r.amount = 0;
+                });
+                saveData();
+            }
         }
 
         function toggleRowCheck(rowId) {
@@ -205,13 +214,6 @@
             }
         }
 
-        function deleteRow(rowId) {
-            let sheet = getCurrentSheet();
-            if (!sheet) return;
-            sheet.rows = sheet.rows.filter(r => r.id !== rowId);
-            saveData();
-        }
-
         // ================= 核心渲染引擎 =================
         function render() {
             let sheet = getCurrentSheet();
@@ -220,14 +222,20 @@
             // 1. 渲染顶部标题
             document.getElementById('sheetTitleDisplay').textContent = sheet.name;
 
-            // 2. 渲染底部 Sheet 标签栏
+            // 2. 渲染底部 Sheet 标签栏 (附带左右移动按钮)
             let tabsContainer = document.getElementById('sheetTabsContainer');
-            tabsContainer.innerHTML = appData.map(s => {
+            tabsContainer.innerHTML = appData.map((s, index) => {
                 let isActive = s.id === activeSheetId;
                 return `
-                    <div onclick="switchSheet(${s.id})" class="px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition flex items-center space-x-2 shrink-0 ${isActive ? 'bg-sky-500 text-slate-950 shadow-md' : 'bg-gray-100 dark:bg-[#2a3748] text-gray-400 hover:text-white'}">
-                        <span>📊 ${s.name}</span>
-                        ${appData.length > 1 ? `<span onclick="deleteCurrentSheet(${s.id}, event)" class="hover:text-rose-400 px-1 font-bold">×</span>` : ''}
+                    <div class="flex items-center space-x-1 shrink-0 ${isActive ? 'bg-emerald-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} px-2.5 py-1.5 rounded-xl text-xs font-bold transition">
+                        <div onclick="switchSheet(${s.id})" class="cursor-pointer flex items-center space-x-1">
+                            <span>📊 ${s.name}</span>
+                        </div>
+                        <div class="flex items-center space-x-0.5 ml-1 opacity-80">
+                            ${index > 0 ? `<button onclick="moveSheet(${index}, -1)" title="向左移动" class="px-1 hover:bg-black/10 rounded">◀</button>` : ''}
+                            ${index < appData.length - 1 ? `<button onclick="moveSheet(${index}, 1)" title="向右移动" class="px-1 hover:bg-black/10 rounded">▶</button>` : ''}
+                            ${appData.length > 1 ? `<button onclick="deleteCurrentSheet(${s.id}, event)" title="删除" class="px-1 hover:text-rose-200">×</button>` : ''}
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -247,28 +255,23 @@
             document.getElementById('checkedTotalDisplay').textContent = checkedTotal.toFixed(2);
             document.getElementById('grandTotalDisplay').textContent = grandTotal.toFixed(2);
 
-            // 4. 渲染行明细 (Checklist 表格化风格)
+            // 4. 渲染固定 33 行
             let rowsContainer = document.getElementById('rowsContainer');
-            if (sheet.rows.length === 0) {
-                rowsContainer.innerHTML = `<div class="text-center py-10 text-xs text-gray-400">当前 Sheet 暂无数据，点击右上角 + Add Row 开始记录</div>`;
-                return;
-            }
-
-            rowsContainer.innerHTML = sheet.rows.map(r => `
-                <div class="bg-white dark:bg-[#1e293b] p-3 rounded-2xl shadow-sm border ${r.checked ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-gray-200 dark:border-slate-800'} flex items-center justify-between space-x-2 transition">
-                    <!-- Tick Box -->
-                    <div class="flex items-center space-x-3 flex-1">
-                        <input type="checkbox" ${r.checked ? 'checked' : ''} onchange="toggleRowCheck(${r.id})" class="w-5 h-5 accent-sky-500 cursor-pointer rounded">
-                        <input type="text" value="${r.label}" onchange="updateRowData(${r.id}, 'label', this.value)" class="bg-transparent text-xs font-medium text-gray-800 dark:text-gray-200 focus:outline-none w-full border-b border-transparent focus:border-sky-400 pb-0.5">
+            rowsContainer.innerHTML = sheet.rows.map((r, idx) => `
+                <div class="bg-white p-2.5 rounded-xl shadow-2xs border ${r.checked ? 'border-emerald-500 bg-emerald-50/40' : 'border-gray-200'} flex items-center justify-between space-x-2 transition">
+                    <!-- 序号与 Tick Box 与 标签 -->
+                    <div class="flex items-center space-x-2.5 flex-1">
+                        <span class="text-[10px] text-gray-400 font-mono w-5 text-right">${idx + 1}</span>
+                        <input type="checkbox" ${r.checked ? 'checked' : ''} onchange="toggleRowCheck(${r.id})" class="w-5 h-5 accent-emerald-600 cursor-pointer rounded">
+                        <input type="text" value="${r.label}" onchange="updateRowData(${r.id}, 'label', this.value)" class="bg-transparent text-xs font-medium text-gray-700 focus:outline-none w-full border-b border-transparent focus:border-emerald-500 pb-0.5">
                     </div>
 
-                    <!-- 数字金额输入 -->
-                    <div class="flex items-center space-x-2 shrink-0">
-                        <div class="flex items-center bg-gray-50 dark:bg-[#0f172a] px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700">
-                            <span class="text-[10px] text-gray-400 mr-1">RM</span>
-                            <input type="number" step="0.01" value="${r.amount}" onchange="updateRowData(${r.id}, 'amount', this.value)" class="bg-transparent text-xs font-black text-sky-400 w-20 text-right focus:outline-none">
+                    <!-- 金额输入框 -->
+                    <div class="flex items-center space-x-1 shrink-0">
+                        <div class="flex items-center bg-gray-50 px-2 py-1 rounded-lg border border-gray-200">
+                            <span class="text-[9px] text-gray-400 mr-1">RM</span>
+                            <input type="number" step="0.01" value="${r.amount}" onchange="updateRowData(${r.id}, 'amount', this.value)" class="bg-transparent text-xs font-bold text-emerald-700 w-20 text-right focus:outline-none">
                         </div>
-                        <button onclick="deleteRow(${r.id})" class="text-gray-400 hover:text-rose-400 text-xs p-1" title="删除行">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -279,4 +282,3 @@
     </script>
 </body>
 </html>
-
