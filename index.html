@@ -57,7 +57,7 @@
             </div>
         </div>
 
-        <!-- 统计面板 (Excel 绿白极简风) -->
+        <!-- 统计面板 -->
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex justify-between items-center">
             <div>
                 <span class="text-[10px] text-gray-400 uppercase tracking-wider block font-semibold">Checked Total (已勾选合计)</span>
@@ -75,7 +75,7 @@
         <!-- 动态生成 33 行 -->
     </div>
 
-    <!-- 底部 Excel 风格 Sheet 标签栏 (支持左右移动、新增) -->
+    <!-- 底部 Excel 风格 Sheet 标签栏 -->
     <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-gray-200 px-3 py-2.5 flex items-center space-x-2 z-50 shadow-2xl">
         <div id="sheetTabsContainer" class="flex items-center space-x-1.5 flex-1 overflow-x-auto pb-1">
             <!-- 动态生成 Sheet 标签 -->
@@ -87,15 +87,15 @@
 
     <!-- Core JavaScript -->
     <script>
-        // 初始化默认生成 33 行的辅助函数
         function createDefault33Rows() {
             let rows = [];
             for (let i = 1; i <= 33; i++) {
                 rows.push({
                     id: Date.now() + i,
                     checked: false,
+                    pending: false, // 新增：⏳ 状态标记
                     label: `${i}`,
-                    amount: 0
+                    amount: ''     // 默认留空，不再显示 0
                 });
             }
             return rows;
@@ -153,7 +153,6 @@
             }
         }
 
-        // 移动 Sheet 位置 (向左 / 向右)
         function moveSheet(index, direction) {
             let targetIndex = index + direction;
             if (targetIndex < 0 || targetIndex >= appData.length) return;
@@ -181,10 +180,11 @@
         function clearCurrentSheet() {
             let sheet = getCurrentSheet();
             if (!sheet) return;
-            if (confirm("确定要清空当前 Sheet 的所有勾选和数字吗？")) {
+            if (confirm("确定要清空当前 Sheet 的所有勾选、状态和数字吗？")) {
                 sheet.rows.forEach(r => {
                     r.checked = false;
-                    r.amount = 0;
+                    r.pending = false;
+                    r.amount = '';
                 });
                 saveData();
             }
@@ -200,6 +200,17 @@
             }
         }
 
+        // 切换 ⏳ 挂账红字状态
+        function toggleRowPending(rowId) {
+            let sheet = getCurrentSheet();
+            if (!sheet) return;
+            let row = sheet.rows.find(r => r.id === rowId);
+            if (row) {
+                row.pending = !row.pending;
+                saveData();
+            }
+        }
+
         function updateRowData(rowId, field, value) {
             let sheet = getCurrentSheet();
             if (!sheet) return;
@@ -208,7 +219,7 @@
                 if (field === 'label') {
                     row.label = value;
                 } else if (field === 'amount') {
-                    row.amount = parseFloat(value) || 0;
+                    row.amount = value === '' ? '' : parseFloat(value);
                 }
                 saveData();
             }
@@ -222,7 +233,7 @@
             // 1. 渲染顶部标题
             document.getElementById('sheetTitleDisplay').textContent = sheet.name;
 
-            // 2. 渲染底部 Sheet 标签栏 (附带左右移动按钮)
+            // 2. 渲染底部 Sheet 标签栏
             let tabsContainer = document.getElementById('sheetTabsContainer');
             tabsContainer.innerHTML = appData.map((s, index) => {
                 let isActive = s.id === activeSheetId;
@@ -257,27 +268,39 @@
 
             // 4. 渲染固定 33 行
             let rowsContainer = document.getElementById('rowsContainer');
-            rowsContainer.innerHTML = sheet.rows.map((r, idx) => `
-                <div class="bg-white p-2.5 rounded-xl shadow-2xs border ${r.checked ? 'border-emerald-500 bg-emerald-50/40' : 'border-gray-200'} flex items-center justify-between space-x-2 transition">
-                    <!-- 序号与 Tick Box 与 标签 -->
-                    <div class="flex items-center space-x-2.5 flex-1">
-                        <span class="text-[10px] text-gray-400 font-mono w-5 text-right">${idx + 1}</span>
-                        <input type="checkbox" ${r.checked ? 'checked' : ''} onchange="toggleRowCheck(${r.id})" class="w-5 h-5 accent-emerald-600 cursor-pointer rounded">
-                        <input type="text" value="${r.label}" onchange="updateRowData(${r.id}, 'label', this.value)" class="bg-transparent text-xs font-medium text-gray-700 focus:outline-none w-full border-b border-transparent focus:border-emerald-500 pb-0.5">
-                    </div>
+            rowsContainer.innerHTML = sheet.rows.map((r, idx) => {
+                // 如果 pending 为 true，金额显示为红色
+                let amountColorClass = r.pending ? 'text-rose-600 font-black' : 'text-emerald-700 font-bold';
 
-                    <!-- 金额输入框 -->
-                    <div class="flex items-center space-x-1 shrink-0">
-                        <div class="flex items-center bg-gray-50 px-2 py-1 rounded-lg border border-gray-200">
-                            <span class="text-[9px] text-gray-400 mr-1">RM</span>
-                            <input type="number" step="0.01" value="${r.amount}" onchange="updateRowData(${r.id}, 'amount', this.value)" class="bg-transparent text-xs font-bold text-emerald-700 w-20 text-right focus:outline-none">
+                return `
+                    <div class="bg-white p-2.5 rounded-xl shadow-2xs border ${r.checked ? 'border-emerald-500 bg-emerald-50/40' : 'border-gray-200'} flex items-center justify-between space-x-2 transition">
+                        <!-- 序号与主勾选框与标签 -->
+                        <div class="flex items-center space-x-2.5 flex-1">
+                            <span class="text-[10px] text-gray-400 font-mono w-5 text-right">${idx + 1}</span>
+                            <input type="checkbox" ${r.checked ? 'checked' : ''} onchange="toggleRowCheck(${r.id})" class="w-5 h-5 accent-emerald-600 cursor-pointer rounded" title="勾选计入统计">
+                            <input type="text" value="${r.label}" onchange="updateRowData(${r.id}, 'label', this.value)" class="bg-transparent text-xs font-medium text-gray-700 focus:outline-none w-full border-b border-transparent focus:border-emerald-500 pb-0.5">
+                        </div>
+
+                        <!-- 金额输入框与 ⏳ 状态勾选 -->
+                        <div class="flex items-center space-x-2 shrink-0">
+                            <!-- ⏳ 状态小勾选框 -->
+                            <label class="flex items-center space-x-0.5 cursor-pointer bg-gray-50 hover:bg-gray-100 px-1.5 py-1 rounded-lg border border-gray-200 text-[10px]" title="标记待定/红字 (⏳)">
+                                <span class="select-none">⏳</span>
+                                <input type="checkbox" ${r.pending ? 'checked' : ''} onchange="toggleRowPending(${r.id})" class="w-3.5 h-3.5 accent-rose-600 cursor-pointer rounded">
+                            </label>
+
+                            <!-- 金额输入框 (去零留空) -->
+                            <div class="flex items-center bg-gray-50 px-2 py-1 rounded-lg border border-gray-200">
+                                <span class="text-[9px] text-gray-400 mr-1">RM</span>
+                                <input type="number" step="0.01" value="${r.amount !== '' ? r.amount : ''}" placeholder="" onchange="updateRowData(${r.id}, 'amount', this.value)" class="bg-transparent text-xs ${amountColorClass} w-20 text-right focus:outline-none">
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        // 初始化
+        // 初始化渲染
         render();
     </script>
 </body>
